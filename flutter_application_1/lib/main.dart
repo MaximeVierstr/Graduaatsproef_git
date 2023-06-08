@@ -160,7 +160,7 @@ class _CustomDropdownState extends State<CustomDropdown> {
       items: <String>[
         'Allphi',
         'Opel',
-        'Skoda',
+        'Skeuda',
       ].map<DropdownMenuItem<String>>((String value) {
         return DropdownMenuItem<String>(
           value: value,
