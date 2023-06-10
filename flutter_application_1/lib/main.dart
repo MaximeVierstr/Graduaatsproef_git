@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 const List<String> list = <String>['One', 'Two', 'Three', 'Four'];
 
@@ -145,7 +147,7 @@ class CustomDropdown extends StatefulWidget {
   _CustomDropdownState createState() => _CustomDropdownState();
 }
 
-class _CustomDropdownState extends State<CustomDropdown> {
+/*class _CustomDropdownState extends State<CustomDropdown> {
   String dropdownValue = 'Allphi';
 
   @override
@@ -168,5 +170,74 @@ class _CustomDropdownState extends State<CustomDropdown> {
         );
       }).toList(),
     );
+  }
+}*/
+
+class _CustomDropdownState extends State<CustomDropdown> {
+  String dropdownValue = '';
+  List<String> bedrijven = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchBedrijven();
+  }
+
+  Future<void> fetchBedrijven() async {
+    final Uri url = Uri.parse("https://localhost:7020/api/Bedrijf");
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = jsonDecode(response.body);
+      List<String> bedrijvenList =
+          data.map<String>((bedrijf) => bedrijf['naam'] as String).toList();
+      setState(() {
+        bedrijven = bedrijvenList;
+        if (bedrijvenList.isNotEmpty) {
+          dropdownValue = bedrijvenList[0];
+        }
+      });
+    } else {
+      // handle error
+      print('Error: ${response.statusCode}');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DropdownButton<String>(
+      value: dropdownValue,
+      onChanged: (String? newValue) {
+        setState(() {
+          dropdownValue = newValue!;
+        });
+      },
+      items: bedrijven.map<DropdownMenuItem<String>>((String value) {
+        return DropdownMenuItem<String>(
+          value: value,
+          child: Text(value),
+        );
+      }).toList(),
+    );
+  }
+}
+
+Future<List<dynamic>> getBedrijven() async {
+  try {
+    final response =
+        await http.get(Uri.parse('https://localhost:7020/api/Bedrijf'));
+
+    if (response.statusCode == 200) {
+      // Successful API call
+      return jsonDecode(response.body);
+    } else {
+      // Handle error response
+      print('Error: ${response.statusCode}');
+      return [];
+    }
+  } catch (e) {
+    // Handle network or other errors
+    print('Error: $e');
+    return [];
   }
 }
